@@ -1,0 +1,2 @@
+-- autocmds.lua
+-- aquí irán tus autocmds en el futuro
