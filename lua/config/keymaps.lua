@@ -3,10 +3,11 @@ local keymap = vim.keymap
 -- Guardar
 keymap.set("n", "<leader>w", ":w<CR>")
 keymap.set("n", "<leader>q", ":w | bd | Alpha<CR>", { noremap = true, silent = true })
+keymap.set("n", "<leader>qq", ":bd! | Alpha<CR>",
+    { noremap = true, silent = true, desc = "Discard buffer and go to Alpha" })
 keymap.set("n", "<C-s>", ":w<CR>")
 
 -- Debugger
-
 keymap.set("n", "<leader>bc", function() require("dap").continue() end)
 keymap.set("n", "<leader>bn", function() require("dap").step_over() end)
 keymap.set("n", "<leader>bi", function() require("dap").step_into() end)
@@ -14,39 +15,24 @@ keymap.set("n", "<leader>bo", function() require("dap").step_out() end)
 keymap.set("n", "<leader>bb", function() require("dap").toggle_breakpoint() end, { desc = "Toggle Breakpoint" })
 
 -- Run Python
-keymap.set("n", "<leader>za", function()
+local function run_python(opts)
     vim.cmd("write")
-    vim.cmd("botright split")
-    vim.cmd("resize 12")
-    vim.cmd("terminal /home/deth/Desktop/01001101/Python_code/Python_exercice/engine/bin/python " .. vim.fn.expand("%"))
+    if opts.split == "v" then
+        vim.cmd("botright vsplit | vertical resize 80")
+    else
+        vim.cmd("botright split | resize 12")
+    end
+    local cmd = opts.interactive and "ipython -i" or "python"
+    vim.cmd("terminal " .. cmd .. " " .. vim.fn.expand("%"))
     vim.cmd("startinsert")
-end, { desc = "Run Python in terminal split" })
+end
 
-keymap.set("n", "<leader>zv", function()
-    vim.cmd("write")
-    vim.cmd("botright vsplit")
-    vim.cmd("vertical resize 80")
-    vim.cmd("terminal /home/deth/Desktop/01001101/Python_code/Python_exercice/engine/bin/python " .. vim.fn.expand("%"))
-    vim.cmd("startinsert")
-end, { desc = "Run Python in vertical split" })
-
-
--- Run Python en modo interactivo (con -i)
-keymap.set("n", "<leader>zs", function()
-    vim.cmd("write")
-    vim.cmd("botright split")
-    vim.cmd("resize 12")
-    -- Usamos el mismo intérprete pero con el flag -i
-    vim.cmd("terminal /home/deth/Desktop/01001101/Python_code/Python_exercice/engine/bin/ipython -i " ..
-    vim.fn.expand("%"))
-    vim.cmd("startinsert")
-end, { desc = "Run Python interactively in terminal split (with -i)" })
-
-keymap.set("n", "<leader>zc", function()
-    vim.cmd("write")
-    vim.cmd("botright vsplit")
-    vim.cmd("vertical resize 80")
-    vim.cmd("terminal /home/deth/Desktop/01001101/Python_code/Python_exercice/engine/bin/ipython -i " ..
-    vim.fn.expand("%"))
-    vim.cmd("startinsert")
-end, { desc = "Run Python interactively in vertical split (with -i)" })
+-- Mapeos para Python
+keymap.set("n", "<leader>za", function() run_python({ split = "h", interactive = false }) end,
+    { desc = "Run Python (split)" })
+keymap.set("n", "<leader>zv", function() run_python({ split = "v", interactive = false }) end,
+    { desc = "Run Python (vertical)" })
+keymap.set("n", "<leader>zs", function() run_python({ split = "h", interactive = true }) end,
+    { desc = "Run Python interactive (split)" })
+keymap.set("n", "<leader>zc", function() run_python({ split = "v", interactive = true }) end,
+    { desc = "Run Python interactive (vertical)" })
